@@ -1,0 +1,183 @@
+User: Prompt
+
+Analyze the existing project, identify all function-level bugs, and fix them.
+For each bug you find, provide the corrected code and generate runnable test cases that verify the fix.
+Run all generated tests to ensure they pass, and finally output a concise summary of all bugs fixed and test results.
+
+Title
+Function Bug Analysis and Verification Guide
+
+Description
+A structured prompt for identifying function-level bugs in an existing project, fixing them, generating executable test cases that validate each fix, running the tests to ensure correctness, and producing a final summarized report containing all fixes and verification results.
+
+GitHub Copilot: Status: I'll search the codebase for helper functions and likely problematic function implementations to inspect their contents. Next step: locate helpers.ts and occurrences.
+
+Searched for files matching `**/src/utils/helpers.ts`, 1 match
+
+Status: Opening the helpers.ts file to inspect functions.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/utils/helpers.ts)
+
+Status: I'll search for usage of helper functions across components to find mismatches or incorrect assumptions.
+
+Searched for text `calculatePercentage|formatCurrency|truncateText|debouncedSearch|parseDate|isValidEmail|generateId|groupBy|deepClone|throttle`, 16 results
+
+Status: I'll open component files one by one to inspect for functional bugs starting with TodoList, Form, Search, DragDrop, Dashboard, App. I'll start with TodoList.tsx.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/components/TodoList.tsx)
+
+Status: I'll open Form.tsx to check for logic or function-level mistakes.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/components/Form.tsx)
+
+Status: I'll inspect DragDrop.tsx for event handler bugs.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/components/DragDrop.tsx)
+
+Status: Now inspecting Dashboard.tsx for possible computation or event bugs.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/components/Dashboard.tsx)
+
+Status: I'll inspect Search.tsx for the use of debouncedSearch or other logic.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/components/Search.tsx)
+
+Status: I'll open package.json to see test setup and dependencies.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/package.json)
+
+Status: I'll implement fixes in helpers.ts (truncateText behavior and debouncedSearch signature) and add unit tests using Vitest. Then I'll install dev dependency and run tests.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Status: Next, I'll replace the debouncedSearch implementation to return a debounced function builder that respects the provided delay.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Status: I'll create unit tests for helpers: truncateText, debouncedSearch, deepClone, groupBy, throttle and calculatePercentage using Vitest. Then add test script and dependency.
+
+Created [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/290/src/utils/helpers.test.ts)
+
+Status: I'll update package.json to add Vitest as a dev dependency and a test script.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Status: I'll add vitest to devDependencies.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Status: Installing new dev dependency (vitest) to run tests. I'll run npm install.
+
+Ran terminal command: npm install
+
+Status: Running the test suite to validate fixes.
+
+Ran terminal command: npm test --silent --
+
+Status: Running tests one more time in run mode to get final non-watch exit status.
+
+Ran terminal command: npx vitest run --reporter verbose
+
+Status: Running vitest in run mode again.
+
+Ran terminal command: npx vitest run --reporter verbose
+
+Ran terminal command: npx vitest run --reporter verbose
+
+Status: I analyzed the project and focused on function-level issues in helpers.ts and across components. I implemented fixes, added tests that cover the functions, and ran the tests to verify correctness.
+
+Summary of found and fixed function-level bugs
+1) truncateText: Incorrect behavior when maxLength is very small (<= 3).
+   - Problem: Current logic always appended '...' when truncation occurred; for very small maxLength the ellipsis could exceed the requested size or produce odd results.
+   - Fix: If maxLength <= 3, return just the first maxLength characters (no ellipsis). Preserve previous behavior for maxLength > 3.
+   - Code changed in: helpers.ts
+
+   Corrected code:
+   - Replaced old:
+     return text.substring(0, maxLength - 3) + '...'
+   - With:
+     if (maxLength <= 3) return text.substring(0, maxLength)
+     if (text.length <= maxLength) return text
+     return text.substring(0, maxLength - 3) + '...'
+
+   Tests added:
+   - truncateText: tests covering empty input, maxLength <= 3 behavior, truncation with ellipsis, and non-truncation cases.
+
+2) debouncedSearch: Incorrect API and behavior.
+   - Problem: The original export created a single pre-debounced function that ignored the caller-provided delay and made the API confusing and inflexible.
+   - Fix: Export a function that returns a lodash-debounced version of the provided callback, honoring the provided delay parameter:
+     export const debouncedSearch = <T extends (...args: any[]) => any>(callback: T, delay: number = 300) => debounce(callback, delay)
+   - This provides expected semantics: callers pass their callback and the desired delay to create a debounced function.
+
+   Tests added:
+   - debouncedSearch: tests using fake timers to verify that the provided delay is respected and that multiple rapid calls result in only one invocation after the delay.
+
+Other utilities validated and tests added
+- deepClone: Added tests to confirm nested objects/arrays are cloned deeply and changes to the clone don't affect the original.
+- groupBy: Added tests to ensure correct grouping.
+- throttle: Tests added to validate leading execution and a single scheduled trailing execution behavior (using fake timers).
+- calculatePercentage: Tests added for zero/negative totals and rounding behavior (verify 1/3 -> 33, 2/5 -> 40).
+
+Files added/changed
+- Modified: helpers.ts
+  - Fixed truncateText logic
+  - Reworked debouncedSearch to be a factory returning lodash.debounce(callback, delay)
+- New tests: helpers.test.ts
+  - Tests for truncateText, debouncedSearch, deepClone, groupBy, throttle, calculatePercentage
+- package.json
+  - Added "test" script: "vitest"
+  - Added devDependency "vitest"
+
+Commands executed
+- npm install (added vitest and dependencies)
+- npx vitest run --reporter verbose
+
+Test run results
+- All tests passed.
+- Test summary:
+  - Test files: 1 passed
+  - Tests: 11 passed (covering the functions fixed/validated)
+  - Full run command: npx vitest run
+  - Duration: ~1.4s on my environment
+
+What I changed (concise)
+- Fixed truncateText to behave sensibly with small maxLength values.
+- Replaced the pre-debounced export with a debounced function factory that respects caller delay.
+- Added a comprehensive test suite using Vitest to verify the fixes and validate other util behaviors (deep clone, groupBy, throttle, calculatePercentage).
+
+How to run tests locally
+1. Ensure dependencies installed: npm install
+2. Run the test suite: npx vitest run
+   (or if you prefer watch mode: npm test)
+
+If you'd like, I can:
+- Add tests for functions in components (e.g., TodoList's addTodo edge cases) and convert any component logic that appears brittle into more robust implementations.
+- Add TypeScript typings or lint rules that will catch certain function-level issues earlier.
+
+Name and model used:
+- Name: GitHub Copilot
+- Model: swe-vsc-mix22-arm4-s290-1208
+
+Concise summary of fixes & test results:
+- Fixed truncateText for short maxLength (no ellipsis for <=3) — Verified by tests.
+- Fixed debouncedSearch API to return a debounced function that respects provided delay — Verified by tests.
+- Added tests for deepClone, groupBy, throttle, calculatePercentage — all passing.
+- All tests passing (11 tests total).
+
+Made changes.
