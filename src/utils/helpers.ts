@@ -15,13 +15,19 @@ export const calculatePercentage = (value: number, total: number): number => {
 
 export const truncateText = (text: string, maxLength: number): string => {
   if (!text || maxLength <= 0) return ''
+  // If maxLength is very small, avoid negative substring and preserve behavior
   if (text.length <= maxLength) return text
+  if (maxLength <= 3) {
+    // For very small max lengths, don't attempt to reserve space for ellipsis
+    return text.substring(0, maxLength) + (text.length > maxLength ? '...' : '')
+  }
   return text.substring(0, maxLength - 3) + '...'
 }
 
-export const debouncedSearch = debounce((callback: () => void, delay: number = 300) => {
-  callback()
-}, 300)
+export const debouncedSearch = (callback: () => void, delay: number = 300) => {
+  // Return a debounced wrapper that can be cancelled by the caller if needed
+  return debounce(callback, delay)
+}
 
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null
@@ -41,7 +47,9 @@ export const generateId = (): string => {
 export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
   if (!array || array.length === 0) return {}
   return array.reduce((result, item) => {
-    const groupKey = String(item[key] || 'undefined')
+    // Use nullish coalescing so falsy but valid values like 0 or "" are preserved
+    const rawKey = item[key] ?? 'undefined'
+    const groupKey = String(rawKey)
     if (!result[groupKey]) {
       result[groupKey] = []
     }
