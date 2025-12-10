@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import { escapeRegex } from '../utils/helpers'
 import './Search.css'
 
 interface SearchResult {
@@ -15,7 +16,7 @@ const Search = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+  const debounceTimer = useRef<number | null>(null)
 
   const categories = ['all', 'technology', 'science', 'business', 'health']
 
@@ -91,7 +92,8 @@ const Search = () => {
 
   const highlightText = (text: string, highlight: string) => {
     if (!highlight) return text
-    const parts = text.split(new RegExp(`(${highlight})`, 'gi'))
+    const escaped = escapeRegex(highlight)
+    const parts = text.split(new RegExp(`(${escaped})`, 'gi'))
     return parts.map((part, i) => 
       part.toLowerCase() === highlight.toLowerCase() ? (
         <mark key={i}>{part}</mark>
