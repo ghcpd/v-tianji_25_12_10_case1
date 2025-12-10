@@ -16,12 +16,13 @@ export const calculatePercentage = (value: number, total: number): number => {
 export const truncateText = (text: string, maxLength: number): string => {
   if (!text || maxLength <= 0) return ''
   if (text.length <= maxLength) return text
+  if (maxLength <= 3) return text.substring(0, maxLength)
   return text.substring(0, maxLength - 3) + '...'
 }
 
-export const debouncedSearch = debounce((callback: () => void, delay: number = 300) => {
-  callback()
-}, 300)
+export const debouncedSearch = (callback: (...args: any[]) => void, delay: number = 300) => {
+  return debounce(callback, delay)
+} 
 
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null
@@ -41,7 +42,8 @@ export const generateId = (): string => {
 export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
   if (!array || array.length === 0) return {}
   return array.reduce((result, item) => {
-    const groupKey = String(item[key] || 'undefined')
+    const keyVal = item[key]
+    const groupKey = String(keyVal === undefined || keyVal === null ? 'undefined' : keyVal)
     if (!result[groupKey]) {
       result[groupKey] = []
     }

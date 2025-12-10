@@ -1,0 +1,144 @@
+User: Prompt
+
+Analyze the existing project, identify all function-level bugs, and fix them.
+For each bug you find, provide the corrected code and generate runnable test cases that verify the fix.
+Run all generated tests to ensure they pass, and finally output a concise summary of all bugs fixed and test results.
+
+Title
+Function Bug Analysis and Verification Guide
+
+Description
+A structured prompt for identifying function-level bugs in an existing project, fixing them, generating executable test cases that validate each fix, running the tests to ensure correctness, and producing a final summarized report containing all fixes and verification results.
+
+GitHub Copilot: Scanning project for likely function-level issues (searching code and helpers). I'll run a quick text search for suspicious patterns and missing tests.
+
+Searched for regex `export function|function |=>|console.log|FIXME|TODO|bug|throw new Error|reduce\(|map\(|filter\(|find\(|localStorage`, 20 results
+
+Opening helpers.ts to inspect implementations and edge cases.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/v-tianji_25_12_10_case1/src/utils/helpers.ts)
+
+Checking package.json for test setup and scripts.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/v-tianji_25_12_10_case1/package.json)
+
+I'll make targeted fixes to truncateText, debouncedSearch, and groupBy in src/utils/helpers.ts.
+
+Using "Multi-Replace String in Files"
+
+
+```
+
+```
+Adding vitest devDependency and a test script to package.json.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Adding vitest to devDependencies in package.json.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Adding unit tests for helpers: truncateText, debouncedSearch, groupBy, deepClone, throttle, calculatePercentage, parseDate, isValidEmail, generateId, formatCurrency.
+
+Created [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/v-tianji_25_12_10_case1/src/utils/helpers.test.ts)
+
+Installing dependencies (to add vitest). I'll run npm install.
+
+Ran terminal command: npm install
+
+Running tests with vitest to validate fixes.
+
+Ran terminal command: npm test --silent
+
+Updating package.json test script to use 'vitest run' so tests run once (non-watch) for CI.
+
+Using "Replace String in File"
+
+
+```
+
+```
+Re-running tests in run mode to confirm all tests pass.
+
+Ran terminal command: npm test --silent
+
+Running vitest directly (npx vitest run) to execute tests once.
+
+Ran terminal command: npx vitest run --silent
+
+Inspecting Search.tsx and other components for function-level bugs.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/v-tianji_25_12_10_case1/src/components/Search.tsx)
+
+Inspecting Form.tsx for issues.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/v-tianji_25_12_10_case1/src/components/Form.tsx)
+
+Searching for other potential function-level bugs across components.
+
+Searched for regex `debouncedSearch|truncateText|groupBy|deepClone|generateId|calculatePercentage|isValidEmail`, 20 results
+
+Status: Analysis and fixes complete — I found and fixed three function-level bugs in src/utils/helpers.ts, added unit tests, and verified all tests pass.
+
+Summary of bugs fixed
+- truncateText: Incorrect handling when maxLength <= 3 and potential wrong/shortened output when truncating. Fixed to avoid subtracting 3 for small maxLength.
+  Corrected code:
+  export const truncateText = (text: string, maxLength: number): string => {
+    if (!text || maxLength <= 0) return ''
+    if (text.length <= maxLength) return text
+    if (maxLength <= 3) return text.substring(0, maxLength)
+    return text.substring(0, maxLength - 3) + '...'
+  }
+
+- debouncedSearch: Previously immediately invoked the callback and ignored the delay; now returns a debounced function (using lodash.debounce) so callers can call the returned function and it will debounce correctly.
+  Corrected code:
+  export const debouncedSearch = (callback: (...args: any[]) => void, delay: number = 300) => {
+    return debounce(callback, delay)
+  }
+
+- groupBy: Falsy keys like 0 or '' were coerced to 'undefined' due to `||`. Now treats 0 and empty string as valid keys and only treats null/undefined as 'undefined'.
+  Corrected code:
+  export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
+    if (!array || array.length === 0) return {}
+    return array.reduce((result, item) => {
+      const keyVal = item[key]
+      const groupKey = String(keyVal === undefined || keyVal === null ? 'undefined' : keyVal)
+      if (!result[groupKey]) {
+        result[groupKey] = []
+      }
+      result[groupKey].push(item)
+      return result
+    }, {} as Record<string, T[]>)
+  }
+
+Tests added
+- New tests: helpers.test.ts
+  - Covers: formatCurrency, calculatePercentage, truncateText, debouncedSearch, parseDate, isValidEmail, generateId, groupBy, deepClone, throttle.
+
+Project changes
+- helpers.ts — fixed functions above.
+- helpers.test.ts — new tests.
+- package.json — added vitest devDependency and "test": "vitest run" script.
+
+Test results
+- Commands executed:
+  - npm install
+  - npx vitest run
+- Result: All tests passed — Test Files 1 passed, Tests 9 passed (9/9).
+
+How you can reproduce locally
+1. npm install
+2. npm test
+(or: npx vitest run)
+
+If you want, I can continue scanning for additional function-level issues in other modules or add more tests (edge cases or type refinements).
+
+Made changes.
