@@ -1,5 +1,3 @@
-import { debounce } from 'lodash'
-
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -19,10 +17,6 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength - 3) + '...'
 }
 
-export const debouncedSearch = debounce((callback: () => void, delay: number = 300) => {
-  callback()
-}, 300)
-
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null
   const date = new Date(dateString)
@@ -32,6 +26,10 @@ export const parseDate = (dateString: string): Date | null => {
 export const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
+}
+
+export const escapeRegex = (string: string): string => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 export const generateId = (): string => {

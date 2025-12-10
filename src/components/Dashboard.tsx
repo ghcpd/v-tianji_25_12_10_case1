@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [metrics, setMetrics] = useState<Metric[]>([])
   const [selectedTimeRange, setSelectedTimeRange] = useState<'day' | 'week' | 'month'>('week')
   const [chartData, setChartData] = useState<number[]>([])
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<number | null>(null)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
