@@ -85,15 +85,22 @@ const DragDrop = () => {
   ]
 
   useEffect(() => {
-    const saved = localStorage.getItem('tasks')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setTasks(parsed)
-      } catch (e) {
-        console.error('Failed to load tasks')
+    // Load initial state from localStorage on mount
+    const loadTasks = () => {
+      const saved = localStorage.getItem('tasks')
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setTasks(parsed)
+          }
+        } catch (e) {
+          console.error('Failed to load tasks')
+        }
       }
     }
+    
+    loadTasks()
   }, [])
 
   useEffect(() => {

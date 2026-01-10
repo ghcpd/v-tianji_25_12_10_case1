@@ -82,7 +82,7 @@ const TodoList = () => {
     if (!a.dueDate) return 1
     if (!b.dueDate) return -1
     
-    return b.dueDate.getTime() - a.dueDate.getTime()
+    return a.dueDate.getTime() - b.dueDate.getTime()
   })
 
   const completedCount = todos.filter(t => t.completed).length

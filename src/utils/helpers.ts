@@ -19,9 +19,12 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength - 3) + '...'
 }
 
-export const debouncedSearch = debounce((callback: () => void, delay: number = 300) => {
-  callback()
-}, 300)
+export const debouncedSearch = (callback: () => void, delay: number = 300) => {
+  const debounced = debounce(() => {
+    callback()
+  }, delay)
+  debounced()
+}
 
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null
@@ -70,16 +73,19 @@ export const throttle = <T extends (...args: any[]) => any>(
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean = false
   let lastArgs: Parameters<T> | null = null
+  let lastThis: any = null
   return function(this: any, ...args: Parameters<T>) {
     lastArgs = args
+    lastThis = this
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true
       setTimeout(() => {
         inThrottle = false
         if (lastArgs) {
-          func.apply(this, lastArgs)
+          func.apply(lastThis, lastArgs)
           lastArgs = null
+          lastThis = null
         }
       }, limit)
     }

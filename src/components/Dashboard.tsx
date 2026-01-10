@@ -46,7 +46,7 @@ const Dashboard = () => {
         clearInterval(intervalRef.current)
       }
     }
-  }, [selectedTimeRange])
+  }, [])
 
   useEffect(() => {
     if (containerRef.current) {
@@ -66,7 +66,7 @@ const Dashboard = () => {
         window.removeEventListener('resize', handleResize)
       }
     }
-  }, [selectedTimeRange])
+  }, [])
 
   const maxValue = chartData.length > 0 ? Math.max(...chartData, 100) : 100
   const chartHeight = 200
