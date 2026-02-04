@@ -15,13 +15,17 @@ export const calculatePercentage = (value: number, total: number): number => {
 
 export const truncateText = (text: string, maxLength: number): string => {
   if (!text || maxLength <= 0) return ''
+  // If maxLength is very small, there's no room for an ellipsis
+  if (maxLength <= 3) return text.substring(0, maxLength)
   if (text.length <= maxLength) return text
   return text.substring(0, maxLength - 3) + '...'
 }
 
-export const debouncedSearch = debounce((callback: () => void, delay: number = 300) => {
-  callback()
-}, 300)
+// Returns a debounced version of the provided callback using lodash.debounce
+// Usage: const debounced = debouncedSearch(() => { /* ... */ }, 500)
+export const debouncedSearch = <T extends (...args: any[]) => any>(callback: T, delay: number = 300) => {
+  return debounce(callback, delay)
+}
 
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null
