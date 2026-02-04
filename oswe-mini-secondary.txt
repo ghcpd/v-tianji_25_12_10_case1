@@ -1,0 +1,208 @@
+jitianxiang: Prompt
+
+Analyze the existing project, identify all function-level bugs, and fix them.
+For each bug you find, provide the corrected code and generate runnable test cases that verify the fix.
+Run all generated tests to ensure they pass, and finally output a concise summary of all bugs fixed and test results.
+
+Title
+Function Bug Analysis and Verification Guide
+
+Description
+A structured prompt for identifying function-level bugs in an existing project, fixing them, generating executable test cases that validate each fix, running the tests to ensure correctness, and producing a final summarized report containing all fixes and verification results.
+
+GitHub Copilot: Hi — I'll scan the codebase to find function-level bugs, then fix them, add tests, run the tests, and report results. My next step is to set up a short todo plan so we can proceed systematically.
+
+Created 5 todos
+
+Proceeding to examine the codebase to find function-level bugs.
+
+Starting: *Search codebase for function-level bugs* (1/5)
+
+My next step is to scan source files for likely bugs (logic errors, incorrect calculations, runtime issues).
+
+Searched for files matching `**/src/**`, 15 matches
+
+Now I'll open the utility file and the components to look for logic errors.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/src/utils/helpers.ts)
+
+Time to open UI components and check their functions for bugs.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/src/components/Form.tsx)
+
+Looking into search and other UI components for issues next.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/src/components/Search.tsx)
+
+Next I'll inspect DragDrop, Dashboard, and TodoList for function bugs.
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/src/components/DragDrop.tsx)
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/src/components/TodoList.tsx)
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/src/components/Dashboard.tsx)
+
+Read [](file:///c%3A/Users/v-tianji/Desktop/ghcpd/oswe-mini-secondary/package.json)
+
+Perfect — I've found likely function-level issues in helpers.ts (debouncedSearch, truncateText, groupBy, deepClone, and throttle). Next I'll implement fixes and add unit tests.
+
+Starting: *Fix discovered bugs in source files* (2/5)
+
+Applying code fixes to helpers.ts to correct the bugs found.
+
+Using "Apply Patch"
+
+
+```
+
+```
+I'm going to add a testing setup (Vitest) and create unit tests for each fixed function in helpers.ts.
+
+Starting: *Add runnable unit tests verifying each fix* (3/5)
+
+I'm updating package.json to add Vitest and test scripts, and adding tests under src/utils.
+
+Using "Apply Patch"
+
+
+```
+
+```
+
+
+Using "Apply Patch"
+
+
+```
+
+```
+Installing dependencies (including Vitest) and then running the test suite.
+
+Starting: *Run tests and confirm all pass* (4/5)
+
+Ran terminal command: npm install
+
+Ran terminal command: npm run test:run --silent
+
+Good — tests ran and all helper tests passed. Next I'll finalize the summary of fixes and test results.
+
+Starting: *Produce final summary report* (5/5)
+
+Everything is verified — wrapping up with a concise summary of fixes, the exact changed functions, tests added, and how to run the test suite locally.
+
+Completed: *Produce final summary report* (5/5)
+
+## ✅ Summary — Function-level bugs found, fixed, and tested
+
+I analyzed the project for function-level issues and implemented targeted fixes in helpers.ts. I added unit tests (Vitest) that verify each fix and ran the tests — all tests pass.
+
+Below is a short, actionable summary with the exact changes, test details, and how you can reproduce locally.
+
+---
+
+## 🔧 Files I changed
+- Fixed functions and improvements: helpers.ts
+- Tests added: helpers.test.ts
+- Dev config / scripts: package.json (added Vitest scripts)
+
+---
+
+## 🐞 Bugs found and fixes applied
+
+1. debouncedSearch — incorrect implementation
+   - Problem: The exported `debouncedSearch` returned a debounced wrapper that ignored the requested delay and didn’t expose a reusable debounced function.
+   - Fix: Make `debouncedSearch` a factory that returns `debounce(callback, delay)`.
+   - File: helpers.ts (function replaced)
+
+2. truncateText — incorrect / unsafe truncation for small maxLength
+   - Problem: For small `maxLength` values (<=3), the calculation had a negative or otherwise incorrect substring range.
+   - Fix: Return an empty string for non-positive lengths; if `maxLength <= 3` slice up to `maxLength` then append `'...'`; otherwise keep space for 3-character ellipsis.
+   - File: helpers.ts
+
+3. groupBy — grouping treated falsy keys (0, '') as 'undefined'
+   - Problem: Using `item[key] || 'undefined'` converted 0 and '' into `'undefined'`.
+   - Fix: Check explicitly for `null`/`undefined` and otherwise use `String(keyVal)`.
+   - File: helpers.ts
+
+4. deepClone — fragile property check and array handling
+   - Problem: Relied on `obj.hasOwnProperty` (which fails for objects with no prototype) and used `instanceof Array`.
+   - Fix: Use `Object.prototype.hasOwnProperty.call(...)` and `Array.isArray(...)` for robust handling. Proper date cloning kept.
+   - File: helpers.ts
+
+5. throttle — double call bug on first call
+   - Problem: The implementation stored `lastArgs` for every invocation — including the first call — causing duplicate execution (immediate + trailing) when there were no subsequent calls.
+   - Fix: Only store `lastArgs` when the throttle is active (i.e., already throttled). This preserves expected immediate + optional trailing behavior without double-calling on single call.
+   - File: helpers.ts
+
+---
+
+## 🧪 Tests added
+New tests are in helpers.test.ts (Vitest). Coverage verifies the fixed behavior:
+
+- truncateText tests:
+  - returns empty for invalid inputs
+  - properly truncates and reserves space for ellipsis
+  - handles very small maxLength by slicing + '...'
+
+- debouncedSearch tests:
+  - returns a debounced function that delays execution (uses fake timers to validate behavior)
+
+- groupBy tests:
+  - correctly groups values including falsy ones (0, '')
+
+- deepClone tests:
+  - deep clones nested structures and Date objects, changes to original don't mutate clone
+
+- throttle tests:
+  - single call produces a single immediate call (no trailing duplicate)
+  - multiple calls inside throttle window produce immediate + one trailing call
+
+All tests passed successfully in my run (see test results below).
+
+---
+
+## ▶️ How to run the tests locally
+
+Use Windows PowerShell (per your environment):
+
+1. Install dependencies (if you haven't yet):
+```powershell
+npm install
+```
+
+2. Run tests in watch mode:
+```powershell
+npm test
+```
+
+3. Run tests once (CI mode):
+```powershell
+npm run test:run
+```
+
+---
+
+## 📌 Test run (results)
+I ran the test suite with Vitest. All tests pass:
+
+- Test files run: 1
+- Tests total: 8
+- Status: 8 passed
+- Runtime: ~3s (transform & run)
+
+---
+
+## 🔭 Next steps / notes
+- The main functional bugs uncovered were in helpers.ts — the UI components were examined and seemed correct for their intended behaviours. If you want, I can expand testing to the UI components (snapshot tests, integration tests, or DOM tests) next.
+- If you'd like code coverage added or CI integration for tests, I can add a CI script (GitHub Actions) and a coverage step.
+
+---
+
+If you'd like, I can:
+- add test coverage and CI,
+- extend the test suite to other files,
+- or walk through any of the fixes in more depth.
+
+Which would you like me to do next?
+
+Made changes.

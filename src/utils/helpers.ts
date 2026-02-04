@@ -16,12 +16,21 @@ export const calculatePercentage = (value: number, total: number): number => {
 export const truncateText = (text: string, maxLength: number): string => {
   if (!text || maxLength <= 0) return ''
   if (text.length <= maxLength) return text
+
+  // If maxLength is small (<=3) we cannot meaningfully reserve space for '...'
+  // so slice up to maxLength and still append ellipsis to make the truncation explicit.
+  if (maxLength <= 3) return text.substring(0, maxLength) + '...'
+
+  // Reserve 3 characters for the ellipsis
   return text.substring(0, maxLength - 3) + '...'
 }
 
-export const debouncedSearch = debounce((callback: () => void, delay: number = 300) => {
-  callback()
-}, 300)
+// Returns a debounced function wrapper for the provided callback.
+// The previous implementation created a debounced function that ignored the
+// provided delay and didn't properly return a usable debounced function.
+export const debouncedSearch = (callback: (...args: any[]) => any, delay: number = 300) => {
+  return debounce(callback, delay)
+}
 
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null
@@ -41,7 +50,8 @@ export const generateId = (): string => {
 export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
   if (!array || array.length === 0) return {}
   return array.reduce((result, item) => {
-    const groupKey = String(item[key] || 'undefined')
+    const keyVal = (item as any)[key]
+    const groupKey = keyVal === undefined || keyVal === null ? 'undefined' : String(keyVal)
     if (!result[groupKey]) {
       result[groupKey] = []
     }
@@ -53,12 +63,12 @@ export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
 export const deepClone = <T>(obj: T): T => {
   if (obj === null || typeof obj !== 'object') return obj
   if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T
-  if (obj instanceof Array) return obj.map(item => deepClone(item)) as unknown as T
-  
-  const cloned = {} as T
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      cloned[key] = deepClone(obj[key])
+  if (Array.isArray(obj)) return (obj as unknown as any[]).map(item => deepClone(item)) as unknown as T
+
+  const cloned = {} as any
+  for (const key in obj as any) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      cloned[key] = deepClone((obj as any)[key])
     }
   }
   return cloned
@@ -71,7 +81,11 @@ export const throttle = <T extends (...args: any[]) => any>(
   let inThrottle: boolean = false
   let lastArgs: Parameters<T> | null = null
   return function(this: any, ...args: Parameters<T>) {
-    lastArgs = args
+    // Only save trailing args if we are already throttled. Saving on the
+    // first call would cause duplicate execution (immediate + trailing).
+    if (inThrottle) {
+      lastArgs = args
+    }
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true

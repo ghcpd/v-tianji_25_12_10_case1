@@ -1,0 +1,11 @@
+Prompt
+
+Analyze the existing project, identify all function-level bugs, and fix them.
+For each bug you find, provide the corrected code and generate runnable test cases that verify the fix.
+Run all generated tests to ensure they pass, and finally output a concise summary of all bugs fixed and test results.
+
+Title
+Function Bug Analysis and Verification Guide
+
+Description
+A structured prompt for identifying function-level bugs in an existing project, fixing them, generating executable test cases that validate each fix, running the tests to ensure correctness, and producing a final summarized report containing all fixes and verification results.
